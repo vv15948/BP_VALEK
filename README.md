@@ -1,5 +1,5 @@
 ## Projekt: joint_space_05
-## 🧠 Hlavní skript `main.m`
+## Hlavní skript `main.m`
 
 Tento skript slouží jako hlavní řídicí smyčka celého systému.
 

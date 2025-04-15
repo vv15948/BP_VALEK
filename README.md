@@ -1,3 +1,19 @@
+## 🧠 Hlavní skript `main.m`
+
+Tento skript slouží jako hlavní řídicí smyčka celého systému.
+
+1. Inicializace voxelové mřížky a přidání statických překážek
+2. Vnější smyčka - střídání waypointů - průchozích bodů, které se střídají po dojetí do cíle
+3. Hlavní smyčka
+     - načtení dat z kamery
+     - vytvoření dynamické překážky a přidání do voxel gridu
+     - validace předchozí cesty
+         - validní - posun a vizualizace robota podél předchozí cesty
+         - nevalidní
+             - přepočet od aktuální konfigurace pomocí funkce ### rrt_6dof_connect_03
+             - vizualizace po nově přepočítané cestě
+     - pokud jsme dojeli do cíle, tak opuštění smyčky
+---
 ## Popis funkcí
 
 ### `initializeVoxelGrid`

@@ -1,4 +1,3 @@
-složka 'joint_space_03'
+InitializeVoxelGrid
 
-
-V 'main.m' jsou postupně volány všechny přiložené funkce. Vše by mělo být okomentováno.
+Vytvoření prázdné 3D voxelové mřížky. Nulová matice – prostor bez překážek.

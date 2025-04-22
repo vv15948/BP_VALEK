@@ -36,13 +36,13 @@ Implementuje RRT-Connect – využívá dva rostoucí stromy (ze startu a cíle)
 
 ### `rrt_6dof_connect_02`
 využívá 2 rostoucí stromy - ve 4dof
-     - 1. udělá náhodný krok a 2. se k němu snaží pčiblížit s daným max počtem kroků
-     - následně se stromy vymění a opět se generují nové body, dokud se stromy nespojí
-     - následně jsou seřazeny konfigurace podle indexů rodičů
-     - poslední 2 klouby jsou přidány do konfigurací pomocí interpolace
-     - nakonec je ke každé konfiguraci přiřazena poloha kloubů v prostoru pro kontrolu kolizí
-- `q_path` – plánovaná cesta v joint-space (6xN)
-- `joint_path` – pozice kloubů v prostoru (Nx5x3)
+- 1. udělá náhodný krok a 2. se k němu snaží pčiblížit s daným max počtem kroků
+- následně se stromy vymění a opět se generují nové body, dokud se stromy nespojí
+- následně jsou seřazeny konfigurace podle indexů rodičů
+- poslední 2 klouby jsou přidány do konfigurací pomocí interpolace
+- nakonec je ke každé konfiguraci přiřazena poloha kloubů v prostoru pro kontrolu kolizí
+-      `q_path` – plánovaná cesta v joint-space (6xN)
+-      `joint_path` – pozice kloubů v prostoru (Nx5x3)
        - pozice prvních 4 kloubů a koncového efektoru
 
 

@@ -31,7 +31,7 @@ Označí ve voxel matici start (2) a cíl (3). Slouží pro jednodušší vizual
 
 ### `rrt_6dof_connect_03`
 Implementuje RRT-Connect – využívá dva rostoucí stromy (ze startu a cíle), které se snaží propojit. Obsahuje kolizní kontrolu kloubů i objemového modelu robota ve 3D. Výstupem je:
-- `q_path` – plánovaná trajektorie v joint-space (6xN)
+- `q_path` – plánovaná cesta v joint-space (6xN)
 - `joint_path` – pozice kloubů v prostoru (Nx7x3)
 
 ### `rrt_6dof_connect_02`
@@ -69,10 +69,10 @@ Vytvoří přibližný model člověka a doplní ho do voxel gridu pomocí `add_
 Vytvoří kouli kolem zvoleného bodu a doplní ji do voxel gridu.
 
 ### `is_path_valid`
-Ověří, zda je celá trajektorie bez kolizí. Kontrola probíhá ve dvou krocích (klouby + objem robota).
+Ověří, zda je celá cesta bez kolizí. Kontrola probíhá ve dvou krocích (klouby + objem robota).
 
 ### `plot_voxel_grid`
-Vykreslí aktuální stav prostředí ve 3D včetně modelu robota, překážek, startu/cíle a trajektorie.
+Vykreslí aktuální stav prostředí ve 3D včetně modelu robota, překážek, startu/cíle a cesty.
 
 ## Základní test
 Nalezená cesta ve statických překážkách

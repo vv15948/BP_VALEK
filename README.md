@@ -36,6 +36,7 @@ Implementuje RRT-Connect – využívá dva rostoucí stromy (ze startu a cíle)
 
 ### `rrt_6dof_connect_02`
 využívá 2 rostoucí stromy - ve 4dof
+- step_size nastaveno pro každý kloub zvlášť
 - první udělá náhodný krok a 2. se k němu snaží pčiblížit s daným max počtem kroků
 - následně se stromy vymění a opět se generují nové body, dokud se stromy nespojí
 - následně jsou seřazeny konfigurace podle indexů rodičů
@@ -54,6 +55,9 @@ Prvotní (rychlá) kontrola kolize – ověřuje, zda některý z kloubů není 
 
 ### `is_robot_model_in_collision`
 Druhá (přesnější) kontrola – simuluje objem robota válci mezi klouby a ověřuje kolizi s voxel gridem.
+
+Pro kontrolu pouze pro 4 klouby byla funkce upravena a model robota který se kontroluje je tvořen válci a sférou podle obrázku
+![image](https://github.com/user-attachments/assets/bad6b723-2a66-4ca3-95f4-74ce0d704e7d)
 
 ### `add_cylinder_to_voxel_grid`
 Přidá válec mezi dvěma body se zadaným poloměrem do voxel gridu.

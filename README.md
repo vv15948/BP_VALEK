@@ -70,3 +70,20 @@ Ověří, zda je celá trajektorie bez kolizí. Kontrola probíhá ve dvou kroc�
 ### `plot_voxel_grid`
 Vykreslí aktuální stav prostředí ve 3D včetně modelu robota, překážek, startu/cíle a trajektorie.
 
+## Základní test
+Nalezená cesta ve statických překážkách
+
+![image](https://github.com/user-attachments/assets/e5a6b49c-ba2a-4df4-8489-99c8188f1a07)
+
+Přidání překážky a následný přepočet cesty, kde
+- počet kloubu v kolizi = 17
+- počet modelu robota v kolizi = 153
+- uplynulý čas přepočtu 0.183516 seconds
+  
+![image](https://github.com/user-attachments/assets/b11aeceb-7f5b-4ad9-80fc-0e597cb05351)
+
+Přepočet cesty s dynamickou překážkou
+
+https://github.com/user-attachments/assets/6d545b16-5b39-4b27-8911-726a4b319c56
+
+

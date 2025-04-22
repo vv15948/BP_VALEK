@@ -11,7 +11,7 @@ Tento skript slouží jako hlavní řídicí smyčka celého systému.
      - validace předchozí cesty
          - validní - posun a vizualizace robota podél předchozí cesty
          - nevalidní
-             - přepočet od aktuální konfigurace pomocí funkce ### rrt_6dof_connect_03
+             - přepočet od aktuální konfigurace pomocí funkce ### 'rrt_6dof_connect_02'
              - vizualizace po nově přepočítané cestě
      - pokud jsme dojeli do cíle, tak opuštění smyčky
 ---

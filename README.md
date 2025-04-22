@@ -11,7 +11,7 @@ Tento skript slouží jako hlavní řídicí smyčka celého systému.
      - validace předchozí cesty
          - validní - posun a vizualizace robota podél předchozí cesty
          - nevalidní
-             - přepočet od aktuální konfigurace pomocí funkce ### `rrt_6dof_connect_02`
+             - přepočet od aktuální konfigurace pomocí funkce `rrt_6dof_connect_02`
              - vizualizace po nově přepočítané cestě
      - pokud jsme dojeli do cíle, tak opuštění smyčky
 ---
@@ -36,7 +36,7 @@ Implementuje RRT-Connect – využívá dva rostoucí stromy (ze startu a cíle)
 
 ### `rrt_6dof_connect_02`
 využívá 2 rostoucí stromy - ve 4dof
-- 1. udělá náhodný krok a 2. se k němu snaží pčiblížit s daným max počtem kroků
+- první udělá náhodný krok a 2. se k němu snaží pčiblížit s daným max počtem kroků
 - následně se stromy vymění a opět se generují nové body, dokud se stromy nespojí
 - následně jsou seřazeny konfigurace podle indexů rodičů
 - poslední 2 klouby jsou přidány do konfigurací pomocí interpolace

@@ -13,7 +13,6 @@ Tento skript slouží jako hlavní řídicí smyčka celého systému.
          - nevalidní
              - přepočet od aktuální konfigurace pomocí funkce `rrt_6dof_connect_02`
              - vizualizace po nově přepočítané cestě
-     - pokud jsme dojeli do cíle, tak opuštění smyčky
 ---
 ## Popis funkcí
 

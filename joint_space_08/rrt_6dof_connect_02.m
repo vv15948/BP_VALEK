@@ -1,7 +1,6 @@
-function [q_path, joint_path, u1, u2, goal_flag] = rrt_6dof_connect_02(q_start, q_goal, voxel_grid, range)
+function [q_path, joint_path, u1, u2, goal_flag,dirout] = rrt_6dof_connect_02(q_start, q_goal, voxel_grid, range)
 
-% Plánování probíhá pro první 4 klouby.
-% Zbylé 2 jsou dopočítány jednoduše interpolací
+
 
 % inicializace
 u1 = 0; u2 = 0; goal_flag = false;
@@ -13,19 +12,22 @@ max_step_per_joint = [
     0.25;   % q1
     0.2;    % q2
     0.15;   % q3
-    0.1     % q4
-];
+    0.1;
+    0.1;
+    0.1
+]*0.8;
 max_iter = 3000;
-goal_tolerance = 0.15;
+goal_tolerance = 0.2;
 joint_limits = repmat([-2*pi, 2*pi], 6, 1);
 
 
 % Startovní nastavení stromů
-Q_start = q_start(1:4);
-Q_goal = q_goal(1:4);
+Q_start = q_start;
+[fk_start(:,:,1), dir_start(1,:)] = forward_kinematics_model(q_start);
+Q_goal = q_goal;
 P_start = 0;
 P_goal = 0;
-
+[fk_goal(:,:,1), dir_goal(1,:)] = forward_kinematics_model(q_goal);
 tree_direction = 1;
 goal_bias = 0.4;
 
@@ -37,28 +39,32 @@ for iter = 1:max_iter
     if rand < goal_bias
         q_rand = (tree_direction == 1) * Q_goal(:,1) + (tree_direction == -1) * Q_start(:,1);
     else
-        q_rand = joint_limits(1:4,1) + (joint_limits(1:4,2) - joint_limits(1:4,1)) .* rand(4,1);
+        q_rand = joint_limits(:,1) + (joint_limits(:,2) - joint_limits(:,1)) .* rand(6,1);
     end
 
     % Rozšíření stromu ve směru ke q_rand
     [q_new_start, idx_nearest_s] = extend_tree_matrix(Q_start, q_rand, max_step_per_joint);
     if isempty(q_new_start), continue; end
-    
+
     % Kolizní kontrola 
-    [fk_pos_s] = forward_kinematics_ur5e(q_new_start);
-    if any(fk_pos_s(:,3) < -0.15), continue; end
+    [fk_pos_s,dir] = forward_kinematics_model(q_new_start);
+    if any(fk_pos_s(:,3) < 0.1), continue; end
     if is_joint_in_collision(fk_pos_s, voxel_grid, range), u1 = u1 + 1; continue; end
-    if is_robot_model_in_collision(fk_pos_s, voxel_grid, range), u2 = u2 + 1; continue; end
-    
+    if is_robot_model_in_collision(fk_pos_s, voxel_grid, range,dir), u2 = u2 + 1; continue; end
+
     % Přidání nového bodu do stromu
     Q_start(:,end+1) = q_new_start;
     P_start(end+1) = idx_nearest_s;
+    dir_start(end+1,:) = dir;
+    fk_start(:,:,end+1) = fk_pos_s;
+
 
     % Vyhledání njebližšího bodu ve druhém stromě
     distances = vecnorm(Q_goal - q_new_start, 2, 1);
     [~, idx_nearest_g] = min(distances);
     q_near = Q_goal(:,idx_nearest_g);
-    dist_to_goal = norm(q_new_start - q_goal(1:4));
+
+
     % Kolikrát se maximálně pokusíme udělat kroků od druhého stromu k
     % prvnímu
     max_s = 2;
@@ -72,21 +78,23 @@ for iter = 1:max_iter
 
         % Vytvoření nového bodu
         q_new_goal = q_near + max_step_per_joint .* direction / dist;
-% toto me zajima
-% Ověř, zda se q_new_goal přibližuje ke q_goal (nevrací se zpět)
-if norm(q_new_goal - q_goal(1:4)) > norm(q_near - q_goal(1:4))+0.2
+% Ověření, zda se q_new_goal přibližuje ke q_goal (nevrací se zpět)
+if norm(q_new_goal - q_goal) > norm(q_near - q_goal)+0.2
     break;  % pokračování by vedlo od cíle, ukončíme rozšiřování
 end
 
         % Kolizní kontrola
-        [fk_pos_g] = forward_kinematics_ur5e(q_new_goal);
+        [fk_pos_g,dir] = forward_kinematics_model(q_new_goal);
         if any(fk_pos_g(:,3) < -0.15), break; end
         if is_joint_in_collision(fk_pos_g, voxel_grid, range), u1 = u1 + 1; break; end
-        if is_robot_model_in_collision(fk_pos_g, voxel_grid, range), u2 = u2 + 1; break; end
+        if is_robot_model_in_collision(fk_pos_g, voxel_grid, range,dir), u2 = u2 + 1; break; end
 
         % Přidání bodu do stromu
         Q_goal(:,end+1) = q_new_goal;
         P_goal(end+1) = idx_nearest_g;
+        dir_goal(end+1,:) = dir;
+        fk_goal(:,:,end+1) = fk_pos_g;
+
         idx_nearest_g = size(Q_goal,2);
         q_near = q_new_goal;
 
@@ -115,6 +123,8 @@ if goal_flag, break; end
     % Stromy se nepropojily, tak si vymění role
     [Q_start, Q_goal] = deal(Q_goal, Q_start);
     [P_start, P_goal] = deal(P_goal, P_start);
+    [dir_start, dir_goal] = deal(dir_goal, dir_start);
+    [fk_start, fk_goal] = deal(fk_goal, fk_start);
     tree_direction = -tree_direction;
 end
 
@@ -122,6 +132,7 @@ end
 if goal_flag == false
     q_path = [q_start, q_start];
     joint_path = repmat(zeros(6,3), [2, 1, 1]);
+    dirout = [dir_start(1,:); dir_start(1,:)];
     disp('Stojíme – cíl nenalezen.');
     return;
 end
@@ -131,31 +142,18 @@ idx_s = reconstruct_path_matrix(P_start, goal_idx_start);
 idx_g = reconstruct_path_matrix(P_goal, goal_idx_goal);
 
 % Správné seřazení stromů start -> goal
-if norm(Q_start(:,idx_s(1)) - q_start(1:4)) > norm(Q_goal(:,idx_g(1)) - q_start(1:4))
+if norm(Q_start(:,idx_s(1)) - q_start) > norm(Q_goal(:,idx_g(1)) - q_start)
     [Q_start, Q_goal] = deal(Q_goal, Q_start);
     [P_start, P_goal] = deal(P_goal, P_start);
+    [dir_start, dir_goal] = deal(dir_goal, dir_start);
+    [fk_start, fk_goal] = deal(fk_goal, fk_start);
     [idx_s, idx_g] = deal(idx_g, idx_s);
 end
 
-% Spojení do jedné části
-q_path_4dof = [Q_start(:,idx_s), fliplr(Q_goal(:,idx_g))];
-N = size(q_path_4dof,2);
-
-% Doplnění 5. a 6. kloubu do konfigurací pomocí interpolace
-q_path = zeros(6, N);
-q_path(1:4,:) = q_path_4dof;
-for i = 1:N
-    alpha = (i-1)/(N-1);
-    q_path(5:6,i) = (1 - alpha) * q_start(5:6) + alpha * q_goal(5:6);
-end
-
-% Výpočet polohy jednotlivých kloubů pro každou konfiguraci q_path
-joint_path = zeros(N,5,3);
-for i = 1:N
-    joint_pos = forward_kinematics_ur5e_full(q_path(:,i));
-    joint_path(i,1:4,:) = joint_pos(1:4,:);
-    joint_path(i,5,:) = joint_pos(7,:);
-end
+q_path = [Q_start(:,idx_s), fliplr(Q_goal(:,idx_g))];
+dirout = [dir_start(idx_s,:); flipud(dir_goal(idx_g,:))];
+fk_combined = cat(3, fk_start(:,:,idx_s), fk_goal(:,:,idx_g(end:-1:1)));
+joint_path = permute(fk_combined, [3, 1, 2]);
 
 
 
@@ -189,14 +187,13 @@ end
 
 function idx_path = reconstruct_path_matrix(parent_list, idx)
     idx_path = idx;
-    
+
     % Zpětné procházení rodičů, až k 0
     while parent_list(idx) ~= 0
         idx = parent_list(idx);
         idx_path = [idx, idx_path]; % Seřazení od startu k cíli
     end
 end
-
 
 
 

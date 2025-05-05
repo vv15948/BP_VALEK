@@ -39,6 +39,8 @@ z_range = range(3,:);
     };   
     
     % Přidání válců mezi klíčovými body
+    % maximální délka jednotlivých válců
+    max_each = [0.4 0.4 0.4 0.4 0.6 0.6 0.75];
     for i = 1:size(connections, 1)
         point1_name = connections{i, 1};
         point2_name = connections{i, 2};
@@ -47,8 +49,9 @@ z_range = range(3,:);
         if isfield(landmarks, point1_name) && isfield(landmarks, point2_name)
             start_point = [landmarks.(point1_name).x, landmarks.(point1_name).y, landmarks.(point1_name).z];
             end_point = [landmarks.(point2_name).x, landmarks.(point2_name).y, landmarks.(point2_name).z];
-
-            voxel_grid = add_cylinder_to_voxel_grid(voxel_grid, x_range, y_range, z_range, start_point, end_point, radius);
+            if norm(end_point-start_point) < max_each(i)
+                voxel_grid = add_cylinder_to_voxel_grid(voxel_grid, x_range, y_range, z_range, start_point, end_point, radius);
+            end
         end
     end
 
@@ -71,8 +74,10 @@ z_range = range(3,:);
     
     % Přidání válce pro trup
     if ~isempty(shoulder_mid) && ~isempty(hip_mid)
+        if norm(shoulder_mid-hip_mid) < max_each(7)
         voxel_grid = add_cylinder_to_voxel_grid(voxel_grid, x_range, y_range, z_range, ...
             shoulder_mid, hip_mid, body_radius);
+        end
     end
 
 end

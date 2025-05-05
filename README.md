@@ -1,4 +1,4 @@
-## Projekt: joint_space_05
+## Projekt: joint_space_08
 ## Hlavní skript `main.m`
 
 Tento skript slouží jako hlavní řídicí smyčka celého systému.

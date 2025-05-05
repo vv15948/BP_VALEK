@@ -21,9 +21,6 @@ align = rs.align(rs.stream.color)
 
 # Získání intrinsických parametrů kamery
 profile = pipeline.get_active_profile()
-depth_intrinsics = profile.get_stream(rs.stream.depth).as_video_stream_profile().get_intrinsics()
-fx, fy = depth_intrinsics.fx, depth_intrinsics.fy
-cx, cy = depth_intrinsics.ppx, depth_intrinsics.ppy
 
 # Aplikace filtrů pro zlepšení hloubkových dat
 depth_to_disparity = rs.disparity_transform(True)
@@ -58,6 +55,10 @@ try:
             frames = pipeline.wait_for_frames()
             aligned_frames = align.process(frames)  # Zarovnání hloubky na RGB
             depth_frame = aligned_frames.get_depth_frame()
+            depth_intrinsics = depth_frame.profile.as_video_stream_profile().get_intrinsics()
+            fx, fy = depth_intrinsics.fx, depth_intrinsics.fy
+            cx, cy = depth_intrinsics.ppx, depth_intrinsics.ppy
+            
             color_frame = aligned_frames.get_color_frame()
             if not color_frame or not depth_frame:
                 continue
@@ -90,16 +91,16 @@ try:
                     if 0 <= x_pixel < frame.shape[1] and 0 <= y_pixel < frame.shape[0]:
                         D = depth_image[y_pixel, x_pixel] / 1000.0  # Převod na metry
                     else:
-                        D = 10  # Pokud je mimo rozsah, nastavíme hloubku na 0
+                        D = 2.9  # Pokud je mimo rozsah, nastavíme hloubku na 2.9
 
                     # Přepočet na kartézské souřadnice
                     X = (x_pixel - cx) * D / fx
                     Y = (-(y_pixel - cy) * D / fy)+0.7
-                    Z = D-2.05  # Hloubka přímo jako vzdálenost od kamery
+                    Z = np.sqrt(D**2-X**2-Y**2)-2.55
 
                     # Uložení dat pro MATLAB
-                    pose_data["landmarks"][name] = {"x": X, "y": Z, "z": Y}
-                    print(f"{name}: X={X:.3f} m, Y={Y:.3f} m, Z={Z:.3f} m (Depth={D:.3f} m)")
+                    pose_data["landmarks"][name] = {"x": -X, "y": -Z, "z": Y}
+                    # print(f"{name}: X={X:.3f} m, Y={Y:.3f} m, Z={Z:.3f} m (Depth={D:.3f} m)")
                     
                     # Vykreslení bodů do RGB obrazu
                     cv2.circle(frame, (x_pixel, y_pixel), 5, (0, 255, 0), -1)
@@ -111,6 +112,16 @@ try:
                     cv2.putText(depth_colormap, f"{D:.2f}m", (x_pixel + 5, y_pixel - 5),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
+            y_vals = []
+            for name in pose_data["landmarks"]:
+                if "z" in pose_data["landmarks"][name]:
+                    y_vals.append(pose_data["landmarks"][name]["z"])
+            if len(y_vals) >= 3:
+                height_range = max(y_vals)-min(y_vals)
+                if height_range < 0.8:
+                    print("robot detekovan")
+                    continue
+            
             # Odeslání dat do MATLABu
             data_str = json.dumps(pose_data) + "\n"
             sock.sendall(data_str.encode())

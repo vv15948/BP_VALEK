@@ -1,4 +1,4 @@
-function positions = forward_kinematics_ur5e_full(q)
+function [positions, directions] = forward_kinematics_model(q)
 % Vrátí pozice všech 6 kloubů UR5e + TCP v prostoru
 % q ... 1x6 vektor kloubových úhlů [rad]
 
@@ -32,6 +32,7 @@ DH = [...
 % Inicializace výstupu
 % 6 kloubů + TCP
 positions = zeros(7,3); 
+directions = zeros(1,3); 
 
 % Výpočet dopředné kinematiky
 for i = 1:6
@@ -45,6 +46,11 @@ for i = 1:6
     T = T * A;
     % Uložení poloh kloubů J1-J6
     positions(i,:) = T(1:3,4)';
+    
+    if i == 1
+        x_axis_global = T(1:3,1);               
+        directions(i,:) = x_axis_global / norm(x_axis_global); 
+    end
 end
 
 % TCP pozice (koncový bod)

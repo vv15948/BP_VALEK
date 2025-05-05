@@ -16,6 +16,13 @@ Zásadní změnou je zde nastavení offsetů pro klouby, aby kolizní model repr
 
 ![model_robota_hrubsi_grid](https://github.com/user-attachments/assets/9f84fd6f-ab4f-48d0-88f9-e81dee217e2b)
 
+### `pr` Zpracování dat z kamery
+Získání informací o ohniskové vzdálenosti neodpovídalo realitě. Stačilo jen získání informací z kamery přesunout za načtení hloubkového snímku a výsledky již odpovídají realitě.
+
+![image](https://github.com/user-attachments/assets/eba2542a-5851-4695-b509-169fe3e47d59)
+
+
+
 ### `fill_voxel_grid`
 Omezení jednotlivých válců reprezentující lidksé tělo. Nemůže se stát, že by byly delší než je definováno ve funkci.
 Důvod - občas se překážka vytvořila přes celý pracovní prostor, protože nebyla správně detekovaná. Nicměně v ten konkrétní okamžik ji to zpracovalo špatně. Tohle řešení by tomu mělo zamezit

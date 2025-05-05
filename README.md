@@ -11,6 +11,7 @@ Rozšíření generování nových konfigurací do plného prostoru se 6 stupni 
 ### `is_robot_model_in_collision`
 Funkce je stále využívána při generování nových bodů a taky při validaci předchozí cesty.
 Zásadní změnou je zde nastavení offsetů pro klouby, aby kolizní model reprezentoval reálného robota, jak je vidět na obrázcích.
+To je zajištěno upravenou funkcí pro fk, která má na výstupu taky směrový vektor offsetu pro první kloub.
 
 ![model_robota_opraveny](https://github.com/user-attachments/assets/76cb5fb5-e324-421a-8e5d-bc8af66bae3a)
 

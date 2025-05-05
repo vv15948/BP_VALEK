@@ -1,6 +1,10 @@
 ## Projekt: joint_space_08
 ## Hlavní změny
 
+### `main`
+Doplnění řízení robota z matlabu. 
+Ořezání projeté cesty je dopočítáno podle aktuální konfigurace robota.
+
 ### `rrt_6dof_connect_02`
 Rozšíření generování nových konfigurací do plného prostoru se 6 stupni volnosti.
 

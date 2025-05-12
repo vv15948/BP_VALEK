@@ -6,6 +6,9 @@ import numpy as np
 import time
 import json
 
+import os
+import shutil
+
 # Inicializace MediaPipe Pose
 mp_pose = mp.solutions.pose
 
@@ -16,6 +19,11 @@ config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
 
 pipeline.start(config)
+
+# Vytvoření složky pro obrázky z kamery
+if os.path.exists("camera_frames"):
+    shutil.rmtree("camera_frames")
+os.makedirs("camera_frames", exist_ok=True)
 
 # Funkce pro zarovnání hloubky na RGB obraz
 align = rs.align(rs.stream.color)
@@ -82,6 +90,16 @@ try:
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             pose_data = {"time": time.time(), "landmarks": {}}
 
+            # Uložení časové značky do názvu souboru
+            timestamp_str = f"{pose_data['time']:.3f}"
+
+            # Uložení snímků z kamery s časovou značkou
+            rgb_filename = f"camera_frames/rgb_{timestamp_str}.jpg"
+            depth_filename = f"camera_frames/depth_{timestamp_str}.png"
+            cv2.imwrite(rgb_filename, frame)
+            cv2.imwrite(depth_filename, depth_colormap)
+
+            
             if results.pose_landmarks:
                 sh_l = results.pose_landmarks.landmark[keypoints["shoulder_left"]]
                 sh_r = results.pose_landmarks.landmark[keypoints["shoulder_right"]]

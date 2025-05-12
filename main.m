@@ -5,6 +5,14 @@ clear server
 
 %% Inicializace
 
+    %% Vytvoření složky pro ukládání dat
+save_folder = 'snapshot_data';
+if exist(save_folder, 'dir')
+    rmdir(save_folder, 's');
+end
+mkdir(save_folder);
+frame_index = 1;
+
     %% Připojení k robotu
 
 IP = '10.1.1.2' % IP address of the robot
@@ -104,6 +112,7 @@ while true
         % Zpracování z JSON do MATLAB struktury
         if latest_data ~= ""
             json_data = jsondecode(latest_data);
+            t_matlab = posixtime(datetime('now','TimeZone','UTC')); % Uložení času, kdy přišly data z kamery
             if isempty(json_data.landmarks)
                 fprintf("Nedostatek bodů v aktuálním snímku. Přeskakuji.\n");
                 continue;
@@ -131,6 +140,18 @@ while true
         % Pokud nezasahuje do překážek, tak jede podél aktuální cesty
         if is_valid
 
+        %% Uložení dat
+        
+        t = posixtime(datetime('now','TimeZone','UTC'));
+        delay = t - t_matlab;    % Čas kolik zabralo zpracování dat ro následnou synchronizaci videa
+        timestamp = json_data.time + delay;
+        q_now = ur.config';
+        filename = fullfile(save_folder, sprintf('snapshot_%03d.mat', frame_index));
+        save(filename, 'voxel_grid','range','voxel_size','q_now', 'actual_q_path','actual_joint_position_path_spline','traveled_path','timestamp'); 
+        frame_index = frame_index + 1;
+        %%
+
+
         % Pokud cesta vede přes překážku, tak ji musíme přepočítat
         else
             
@@ -151,7 +172,18 @@ while true
                 
                 % Poslání vypočítané cesty robotu
                 ur.set_config(actual_q_path_spline)
-            
+
+                %% Uložení dat
+                
+                t = posixtime(datetime('now','TimeZone','UTC'));
+                delay = t - t_matlab;    % Čas kolik zabralo zpracování dat ro následnou synchronizaci videa
+                timestamp = json_data.time + delay;
+                q_now = ur.config';
+                filename = fullfile(save_folder, sprintf('snapshot_%03d.mat', frame_index));
+                save(filename, 'voxel_grid','range','voxel_size','q_now', 'actual_q_path','actual_joint_position_path_spline','traveled_path','timestamp'); 
+                frame_index = frame_index + 1;
+                %%
+                
             % Pokud jsme nenašli cestu
             else
                 
@@ -160,6 +192,18 @@ while true
                     
                 actual_q_path_spline = actual_q_path;
                 actual_joint_position_path_spline = actual_joint_position_path;
+
+                %% Uložení dat
+                
+                t = posixtime(datetime('now','TimeZone','UTC'));
+                delay = t - t_matlab;    % Čas kolik zabralo zpracování dat ro následnou synchronizaci videa
+                timestamp = json_data.time + delay;
+                q_now = ur.config';
+                filename = fullfile(save_folder, sprintf('snapshot_%03d.mat', frame_index));
+                save(filename, 'voxel_grid','range','voxel_size','q_now', 'actual_q_path','actual_joint_position_path_spline','traveled_path','timestamp'); 
+                frame_index = frame_index + 1;
+                %%
+                
                 continue;  
             end
         end
